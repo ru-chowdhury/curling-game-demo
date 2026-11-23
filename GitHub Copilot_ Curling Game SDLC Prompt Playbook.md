@@ -106,15 +106,34 @@ This is the first application setup stage. The prompt below creates the files an
 
 **Check:** Complete aim/power/release and restart with keyboard only and with a pointer without dragging; verify visible, non-obscured focus, readable game state and meaningful announcements, target sizes or justified exceptions, responsive layout, contrast, and reduced-motion behavior. Muting must not break gameplay. Record manual checks not performed as unverified.
 
-## Stage 9. Test strategy and automated test suite
+## Stage 9. Test quality and coverage verification
 
 **Copilot mode:** Agent
 
+**Learning objective:** Review existing tests against approved requirements, identify missing or weak coverage, add targeted tests only where necessary, and evaluate the quality of Copilot-generated assertions.
+
+Stages 5-8 already add tests alongside implementation: aim/power and motion, collisions and turns, scoring and the game loop, and input/mute logic. This stage evaluates that evidence rather than generating those suites again.
+
 **Paste into Copilot:**
 
-> Act as a QA engineer. Read the requirement IDs and current code/tests. Create `docs/04-test-plan.md` mapping each requirement to unit tests, integration-level checks, and manual browser checks. Identify missing cases, then add automated Vitest tests for pure scoring, game state, physics, collisions, boundaries, and controls. Include normal, edge, and invalid cases. Run the entire test suite and coverage report. Fix actual failures without weakening assertions merely to make tests pass. Report passed/failed counts, coverage where available, remaining gaps, and commands run. Do not claim browser or mobile testing occurred unless actually performed.
+> Act as a QA engineer reviewing test quality and coverage, not generating a new test suite. Read `docs/01-requirements.md` (including approved updates from Stage 8), `docs/02-architecture.md`, `docs/03-backlog.md`, the current implementation, existing tests, and configured test scripts. Reuse the existing Vitest framework and coverage tooling from Stage 4; do not add frameworks or dependencies.
+>
+> Create or update `docs/04-test-plan.md` with a concise requirements-to-test evidence table: requirement ID and acceptance criterion, relevant existing test file/name and behavior asserted, coverage assessment (adequate, partial/weak, or missing), appropriate manual/integration checks, and execution evidence/status (passed, failed, or not run). Map tests to multiple requirements where appropriate; a requirement may need multiple checks, and not every requirement needs a separate test. Mark requirements without executed evidence as unverified, even if a test exists. Distinguish expected behavior derived from approved requirements from implemented behavior observed in code or execution. Flag ambiguities or mismatches rather than treating current implementation as the specification or inventing game rules.
+>
+> Review existing assertions for meaningful gaps and prioritize the smallest useful set of improvements. Use the actual requirements and implementation to decide whether scoring, turn transitions, valid/invalid actions, game-state changes, restart behavior, or relevant edge cases need additional coverage; these are examples, not a mandatory test-generation checklist. Add tests only for genuine gaps, or strengthen weak assertions without discarding existing checks. If existing coverage is adequate, report that and add no tests. Preserve passing tests rather than rewriting them for style, do not duplicate coverage, and do not weaken assertions to make tests pass. Do not modify application logic; report suspected defects and request separate approval for any application fix.
+>
+> For each proposed new or strengthened test, identify the requirement/acceptance criterion, concrete expected values or state transitions derived from it, and the incorrect behavior the test should detect. Assert meaningful outcomes, not merely that a result exists or is truthy. Do not calculate expected values by calling or copying the implementation under test. Explain how each test would fail for a plausible incorrect result where practical. Show these assertions and their rationale for participant review before editing tests; stop for approval. If an expectation is ambiguous, ask for clarification instead of encoding a guessed rule.
+>
+> After approval, apply only the targeted test changes. Run the relevant focused tests, then the full existing suite and configured coverage command in non-watch mode (for example, `npm test -- --run` and `npm run test:coverage -- --run`, after checking the actual scripts). Record exact commands and observed results, including passed/failed/skipped counts and coverage where available. Treat coverage metrics as supporting evidence, not proof that requirements or assertions are correct; do not chase a percentage by adding redundant tests. Report failures, blocked commands, and checks not run honestly; do not claim tests passed without execution or browser/mobile/manual checks occurred unless performed. Update the evidence table with final results, tests added or strengthened and why, and remaining unverified requirements or acceptance criteria.
 
-**Check:** Critical rules have meaningful assertions and all automated tests pass.
+**Participant review:** Before approving test edits, inspect Copilot's proposed assertions. Explain where the expected values come from in the approved requirements, which observable behavior they verify, and one plausible incorrect outcome they would reject. Reject implementation-derived expectations, existence-only checks, and duplicate cases.
+
+**Verification checkpoint:** Use `docs/04-test-plan.md` and actual output to explain:
+
+- Which requirements and acceptance criteria have adequate test evidence, and which remain partial, weak, or unverified (including manual checks not performed).
+- Which tests were added or strengthened, why they fill meaningful gaps, and how their assertions detect incorrect behavior; adding none is valid when no meaningful gap exists.
+- Which exact commands were executed and their actual results, including failures, skipped tests, unavailable coverage, and commands not run. Do not label failed or unexecuted checks as passed.
+- That existing tests and application logic were preserved, apart from approved assertion improvements, and no unnecessary testing dependencies were introduced.
 
 ## Stage 10. Debugging and code review
 
@@ -240,42 +259,3 @@ Only if time permits and a human explicitly approves a correction, switch to Age
 > Act as a workshop facilitator. Read the original requirements and all project docs. Create `docs/08-demo-and-traceability.md` containing: (1) a concise live demo script showing gameplay, score tracking, sound, mobile controls, tests, and local deployment; (2) a requirements traceability matrix with requirement ID, implementation file(s), test(s), and status (Complete/Partial/Not done); (3) exact demo commands; (4) a short explanation of how GitHub Copilot supported each SDLC phase; (5) known limitations and next-iteration backlog. Use only verified results and do not mark requirements complete without evidence. Do not modify gameplay code in this phase.
 
 **Check:** The facilitator can demonstrate the complete SDLC and a working local game.
-
----
-
-## Facilitator quick runbook
-
-1. **Start:** Open the folder in VS Code and keep this Markdown file visible.
-2. **Plan:** Paste Stages 1–3 in Plan mode, review the generated docs, and approve.
-3. **Build:** Paste Stages 4–8 in Agent mode, pausing to run the game after each playable increment.
-4. **Validate:** Complete Stage 9 and inspect test output. In Stages 10–11, review first with Copilot Code Review/Ask, inspect evidence, and record human classifications and decisions. Correct one approved finding per stage only if time permits; unresolved findings and manual checks remain documented.
-5. **Ship locally:** Paste Stages 12–14, then demo the production preview and traceability matrix.
-6. **Show Git workflow (optional):** Commit after each approved increment; open a pull request if a remote repository is available, but no remote is required for this workshop.
-
-### Standard local commands (after scaffolding)
-
-Use these only after Stage 4 has created `package.json`, configured the scripts, and installed dependencies (or run `npm install` below if needed). Run them from the generated project folder, the repository root by default. Stage 4 provides a minimal landing page; later stages add gameplay and tests.
-
-```bash
-npm install
-npm run dev
-npm test -- --run
-npm run test:coverage
-npm run build
-npm run preview
-```
-
-`npm test -- --run` runs Vitest once; use `npm test` for watch mode. Use the actual scripts in `package.json` if they differ. Run `npm run build` before `npm run preview`. The development and preview URLs are printed by the running server. Use another terminal for tests/builds while a server is running.
-
-### Final definition of done
-
-- [ ] HTML5 canvas rink and stones are playable
-- [ ] Aiming, power, movement, and collisions work
-- [ ] Turns, ends, and score tracking work
-- [ ] Sound effects and mute work
-- [ ] Mouse, keyboard, and mobile/touch controls work
-- [ ] Unit tests run and pass
-- [ ] Responsive and accessibility checks are documented
-- [ ] Production build succeeds and is served locally
-- [ ] README explains how to run and test
-- [ ] Requirement IDs map to code and verification evidence
