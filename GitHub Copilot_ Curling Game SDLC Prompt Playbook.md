@@ -2,11 +2,13 @@
 
 **Workshop outcome:** A playable, tested browser-based curling game running locally.
 
-**How to use:** Open an empty folder in VS Code with GitHub Copilot Chat. Save this playbook in the repository. Copy and paste **one numbered prompt at a time** into Copilot Chat. Use **Plan mode** for planning stages when available and **Agent mode** for file creation, code changes, and running commands. Review each result before proceeding. If your IDE has different modes, use the equivalent planning and editing capabilities.
+**Starting state:** This repository contains the workshop instructions, not an implemented curling game or an npm project. Stages 1-3 produce planning documents. Application scaffolding begins in **Stage 4**, when Copilot creates `package.json`, project files, and npm scripts; gameplay follows in Stages 5-8. Do not run npm commands before scaffolding.
+
+**How to use:** Open this repository folder in VS Code, then open GitHub Copilot Chat. See the [README Getting started section](README.md#getting-started) for setup steps and prerequisites. Start at Stage 1 and copy and paste **one numbered prompt at a time** into Copilot Chat, following all 14 stages in order. Use **Plan mode** for planning stages when available and **Agent mode** for file creation, code changes, and running commands. Review each result before proceeding. If your IDE has different modes, use the equivalent planning and editing capabilities.
 
 **Original customer requirements:** HTML5 canvas, score tracking, sound effects, mobile support, and unit tests.
 
-**Workshop defaults:** Vanilla JavaScript (ES modules), HTML, CSS, Vite, Vitest, no backend, no cloud dependency. Use simple two-player local play, simplified physics, two teams, four stones per team per end, three ends per game. Scoring: only the team with the closest stone inside the house scores, one point for each of its stones closer to the button than the opponent's closest stone, subject to being inside the house. These are *demo rules*, not a full simulation of official curling rules.
+**Workshop defaults (target application, not preinstalled tooling):** Vanilla JavaScript (ES modules), HTML, CSS, Vite, Vitest, no backend, no cloud dependency. Copilot will configure Vite and Vitest in Stage 4 and implement the game incrementally afterward. Use simple two-player local play, simplified physics, two teams, four stones per team per end, three ends per game. Scoring: only the team with the closest stone inside the house scores, one point for each of its stones closer to the button than the opponent's closest stone, subject to being inside the house. These are *demo rules*, not a full simulation of official curling rules.
 
 **Important:** Do not paste every prompt at once. Each stage consumes the files and decisions produced by the previous stage. Ask Copilot to show evidence of commands run, not just say they passed. Approve destructive changes before execution.
 
@@ -48,9 +50,11 @@
 
 **Copilot mode:** Agent
 
+This is the first application setup stage. The prompt below creates the files and scripts needed for npm commands. Its minimal landing page is not yet a playable game.
+
 **Paste into Copilot:**
 
-> Implement only the project scaffolding approved in `docs/02-architecture.md` and `docs/03-backlog.md`. Create a Vite vanilla JavaScript project in the current repository, with `index.html`, `src/` modules, `public/` assets if needed, `tests/`, `.gitignore`, `README.md`, and npm scripts named `dev`, `build`, `preview`, `test`, `test:watch`, and `test:coverage`. Configure Vitest and coverage tooling. Keep the landing page minimal. Install dependencies, run the initial tests and production build, and show the exact commands and outputs. Do not build gameplay yet. Preserve the existing docs and this prompt file.
+> Implement only the project scaffolding approved in `docs/02-architecture.md` and `docs/03-backlog.md`. Create a Vite vanilla JavaScript project in the current repository, with `package.json`, `index.html`, `src/` modules, `public/` assets if needed, `tests/`, `.gitignore`, `README.md`, and npm scripts named `dev`, `build`, `preview`, `test`, `test:watch`, and `test:coverage`. Configure Vitest and coverage tooling. Keep the landing page minimal. Install dependencies, run the initial tests and production build, and show the exact commands and outputs. Do not build gameplay yet. Preserve the existing docs, README workshop starting instructions and playbook link, and this prompt file.
 
 **Check:** `npm install`, `npm run dev`, `npm test -- --run` (or the configured equivalent), and `npm run build` work. Record the actual local URL printed by Vite.
 
@@ -130,7 +134,7 @@
 
 **Paste into Copilot:**
 
-> Act as a technical writer. Update `README.md` for someone receiving this repository in a customer workshop. Include purpose, feature list, simplified game rules, prerequisites, setup, commands to develop/test/build/preview locally, mouse/keyboard/touch controls, screenshots placeholders only if screenshots are not available, architecture overview, test strategy, accessibility notes, known limitations, and troubleshooting. Add a short `CONTRIBUTING.md` with branching, test, and pull-request expectations. Verify every documented npm command against `package.json` and correct inconsistencies.
+> Act as a technical writer. Update `README.md` for someone receiving this repository in a customer workshop. Preserve the workshop starting instructions and playbook link, and distinguish them from instructions for running the now-generated application. Include purpose, feature list, simplified game rules, prerequisites, setup, commands to develop/test/build/preview locally, mouse/keyboard/touch controls, screenshots placeholders only if screenshots are not available, architecture overview, test strategy, accessibility notes, known limitations, and troubleshooting. Add a short `CONTRIBUTING.md` with branching, test, and pull-request expectations. Verify every documented npm command against `package.json` and correct inconsistencies.
 
 **Check:** Another participant can follow the README without asking for missing commands.
 
@@ -167,16 +171,18 @@
 
 ### Standard local commands (after scaffolding)
 
+Use these only after Stage 4 has created `package.json`, configured the scripts, and installed dependencies (or run `npm install` below if needed). Run them from the generated project folder, the repository root by default. Stage 4 provides a minimal landing page; later stages add gameplay and tests.
+
 ```bash
 npm install
 npm run dev
-npm run test
+npm test -- --run
 npm run test:coverage
 npm run build
 npm run preview
 ```
 
-Use the actual scripts in `package.json` if they differ. The development and preview URLs are printed by the running server.
+`npm test -- --run` runs Vitest once; use `npm test` for watch mode. Use the actual scripts in `package.json` if they differ. Run `npm run build` before `npm run preview`. The development and preview URLs are printed by the running server. Use another terminal for tests/builds while a server is running.
 
 ### Final definition of done
 
