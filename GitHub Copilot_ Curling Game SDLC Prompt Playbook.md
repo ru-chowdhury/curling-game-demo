@@ -4,7 +4,7 @@
 
 **Starting state:** This repository contains the workshop instructions, not an implemented curling game or an npm project. Stages 1-3 produce planning documents. Application scaffolding begins in **Stage 4**, when Copilot creates `package.json`, project files, and npm scripts; gameplay follows in Stages 5-8. Do not run npm commands before scaffolding.
 
-**How to use:** Open this repository folder in VS Code, then open GitHub Copilot Chat. See the [README Getting started section](README.md#getting-started) for setup steps and prerequisites. Start at Stage 1 and copy and paste **one numbered prompt at a time** into Copilot Chat, following all 14 stages in order. Use **Plan mode** for planning stages when available and **Agent mode** for file creation, code changes, and running commands. Review each result before proceeding. If your IDE has different modes, use the equivalent planning and editing capabilities.
+**How to use:** Open this repository folder in VS Code, then open GitHub Copilot Chat. See the [README Getting started section](README.md#getting-started) for setup steps and prerequisites. Start at Stage 1 and copy and paste **one prompt at a time** into Copilot Chat, following all 14 stages in order. Use **Plan mode** for planning stages when available and **Agent mode** for file creation, code changes, and running commands. Stages 10-11 use **Copilot Code Review or Ask mode** for review before any optional, human-approved implementation. Review each result before proceeding. If your IDE has different modes, use the equivalent planning, read-only review, and editing capabilities.
 
 **Original customer requirements:** HTML5 canvas, score tracking, sound effects, mobile support, and unit tests.
 
@@ -110,23 +110,96 @@ This is the first application setup stage. The prompt below creates the files an
 
 ## Stage 10. Debugging and code review
 
-**Copilot mode:** Agent
+**Copilot mode:** Copilot Code Review (preferred where available); Ask for chat-based review and evaluation; Agent only for optional approved remediation.
 
-**Paste into Copilot:**
+### 1. Review the current implementation
 
-> Act as a senior reviewer and debugging partner. Review the entire curling-game implementation against `docs/01-requirements.md` and `docs/02-architecture.md`. Look for incorrect scoring, non-deterministic physics, animation timing problems, input edge cases, resize bugs, state leaks on restart, excessive coupling, duplicate code, and browser console errors. Reproduce each issue where possible, prioritize findings, fix high-severity defects in small changes, and add regression tests. Run tests and build again. Create `docs/05-review-findings.md` with issue, severity, evidence, fix, and verification status. Do not invent test outcomes.
+Use **GitHub Copilot Code Review** in VS Code where available:
 
-**Check:** Each fixed defect has evidence and preferably a regression test.
+1. Save your files and open **Source Control** from the Activity Bar. Inspect the diffs to understand the current changes.
+2. Hover over **CHANGES** and select **Copilot Code Review - Uncommitted Changes**. Review comments appear inline and in the **Problems** panel.
+3. If all work is already committed, select relevant implementation code in the editor, right-click, and choose **Review** where available. Selection reviews appear inline and in **Comments**. Record that this is a limited scope, not a whole-application review.
+4. Read the comments without applying suggestions. Do not select **Apply and Go To Next** or request a fix yet.
+
+Availability and labels can vary by VS Code version, account, and organization policy. See [GitHub's VS Code code review instructions](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-code-review?tool=vscode). If the feature is unavailable, use the chat prompt below to review the implementation instead. No pull request or remote repository is required.
+
+### 2. Generate evidence-backed findings without edits
+
+Use the following review criteria for either method. For dedicated review comments, use this prompt in Ask mode to evaluate the comments and fill evidence gaps; attach the comments and affected code as context. Otherwise, use it as the standalone review prompt.
+
+**Paste into Copilot (Ask):**
+
+> Act as a senior reviewer and debugging partner. Review the current curling-game implementation against `docs/01-requirements.md`, `docs/02-architecture.md`, and `docs/04-test-plan.md`. If I supply Copilot Code Review comments, evaluate those first and state the scope you actually inspected. Focus on correctness, unintended behavior, potential defects, error handling, requirements compliance, and relevant regression risks. Examine scoring, deterministic physics, animation timing, input edge cases, resizing, restart state leaks, coupling, and duplication where they affect behavior. Identify browser console checks that require runtime verification.
+>
+> For each actionable finding provide an ID, severity, actual source file and line/function, supporting code or test evidence, expected versus actual behavior, triggering conditions, realistic impact, related requirement ID(s), and a minimal recommended correction. Separate source-based reasoning from observed runtime results; give reproduction or verification steps and mark unperformed checks as unverified. Distinguish confirmed defects from potential concerns and explain uncertainty. Do not invent findings or test outcomes; if none are supported, say so. Return the findings in chat for `docs/05-review-findings.md`. Do not modify files, apply fixes, or rewrite code. Stop for human evaluation.
+
+### 3. Evaluate one finding
+
+Select one finding, open its referenced source location, and read the surrounding code and relevant requirement/test. Explain the issue in your own words. Examine the evidence and triggering conditions; reproduce it or run an existing focused test where practical. Decide whether the issue is genuine, rather than accepting the AI's severity or suggested fix at face value.
+
+### 4. Make an explicit decision
+
+Record a human classification and a separate action, with rationale:
+
+- **Confirmed:** Evidence establishes the issue in this implementation.
+- **Potential concern:** Plausible, but evidence or runtime verification is missing.
+- **Not applicable:** The assumptions do not hold; explain the counterevidence.
+
+Choose **Accept** (approve the proposed correction), **Modify** (approve a revised correction with explicit scope), **Reject** (no correction), or **Investigate** (collect more evidence before approval). Accepting a finding does not automatically apply a suggestion.
+
+Save the findings and your decision in `docs/05-review-findings.md`, retaining requirement IDs, evidence, severity, proposed correction, approval scope, and verification status. Unselected findings may remain unevaluated; do not imply they are approved. If no finding is supported, record that result and the review scope without manufacturing a defect.
+
+### 5. Optional: implement one approved correction
+
+To preserve workshop timing, stop after evaluation if needed. Only after explicit human approval, switch to Agent mode and replace the placeholders below.
+
+**Paste into Copilot (Agent, optional):**
+
+> I approve only finding [ID] in `docs/05-review-findings.md`, with this correction scope: [approved correction]. Implement that one targeted correction, preserving the curling demo rules, requirement IDs, architecture, and existing behavior outside this scope. Add a focused regression test where appropriate, run relevant tests and the production build, and inspect the resulting diff against the approved scope. Report exact commands and observed results, update the finding's fix and verification status, and leave anything not run marked unverified. Do not address other findings, add unnecessary dependencies, or perform broad rewrites. Stop if the correction requires a wider scope and request approval.
+
+**Check:** Review precedes implementation; findings have evidence; one finding has a recorded human classification and action (or no supported findings is documented). Any optional fix is explicitly approved and verified, preferably with a focused regression test.
 
 ## Stage 11. Security, dependencies, and accessibility audit
 
-**Copilot mode:** Agent
+**Copilot mode:** Ask for reviews and evaluation; Agent only for optional approved remediation.
 
-**Paste into Copilot:**
+### 1. Security and reliability review
 
-> Audit this local browser game for common web risks and quality issues: unsafe DOM insertion, input handling, exposed secrets, remote assets, unnecessary dependencies, and package vulnerabilities. Run the package manager's available audit command and distinguish reported findings from confirmed exploitable issues. Also review keyboard navigation, focus states, screen-reader status text, color contrast, touch targets, and mobile layout. Fix actionable high-priority issues without adding unnecessary packages. Create `docs/06-quality-audit.md` with findings, severity, remediation, and items requiring manual testing. Rerun tests and build.
+**Paste into Copilot (Ask):**
 
-**Check:** Findings are documented, with no unsupported claim that the app is fully secure or accessible.
+> Review the generated curling game for relevant security and reliability concerns. Read `docs/01-requirements.md`, `docs/02-architecture.md`, `docs/04-test-plan.md`, actual source files, and dependency manifests/lockfiles. Respect the local-only browser game context: vanilla JavaScript, HTML5 canvas, Vite/Vitest, no backend or cloud dependency. Examine unsafe DOM insertion, input validation, exposed secrets (report locations, not secret values), remote assets, unnecessary dependencies, package vulnerabilities, and error handling that could break gameplay.
+>
+> For each supported finding provide an ID, severity, actual source file and line/function (or manifest/lockfile entry), evidence, triggering conditions or exploit prerequisites, realistic impact, related requirement ID(s), and minimal remediation. Distinguish confirmed findings from potential concerns; an audit advisory alone does not establish exploitability in this game. Identify a suitable read-only package-manager audit command for me to run, then interpret its actual output if supplied. Do not install packages, run automatic audit fixes, or change dependency files. State review limits and checks not performed. Return a security section in chat for `docs/06-quality-audit.md`; say if no findings are supported. Do not modify any files or automatically implement recommendations. Stop for human evaluation.
+
+If dependency audit evidence is needed, run the suggested read-only command (for example, `npm audit`) in the generated project and supply its output. Record command failures or unavailable network access as verification gaps, not a clean audit.
+
+### 2. Accessibility review
+
+**Paste into Copilot (Ask):**
+
+> Review the generated curling game's accessibility against its approved requirements and relevant WCAG 2.2 criteria. Examine actual rendering, input, UI, and audio code: keyboard aiming/power/release and navigation, keyboard traps, focus visibility/order and restart behavior, labeled controls, canvas alternatives, score/turn feedback and live regions, color contrast and non-color cues, touch targets, pointer/drag alternatives, responsive layout, and reduced-motion behavior.
+>
+> For each finding give an ID, severity/impact on players, actual source file and line/function, supporting evidence, related requirement ID(s), applicable WCAG success criterion number and name, and a minimal recommended correction. Consider criteria such as 1.1.1 Non-text Content, 1.4.1 Use of Color, 1.4.3 Contrast (Minimum), 2.1.1 Keyboard, 2.1.2 No Keyboard Trap, 2.4.7 Focus Visible, 2.5.7 Dragging Movements, 2.5.8 Target Size (Minimum), 4.1.2 Name, Role, Value, and 4.1.3 Status Messages only where applicable; explain exceptions or uncertainty.
+>
+> Distinguish confirmed source-level findings from potential concerns requiring runtime verification. Separate code evidence from browser observations; never claim keyboard, screen-reader, contrast, touch, or mobile tests were performed unless observed. Provide a manual checklist with steps and expected results for keyboard-only gameplay, focus after restart, screen-reader score/turn announcements, rendered contrast, touch targets/mobile layout, and reduced-motion settings. Mark unperformed checks unverified. Return an accessibility section in chat for `docs/06-quality-audit.md`. Do not modify files, add tooling/dependencies, or implement fixes. Do not claim full WCAG compliance from source inspection. Stop for human evaluation.
+
+Use the [WCAG 2.2 Quick Reference](https://www.w3.org/WAI/WCAG22/quickref/) to check criterion applicability; a source review is not an accessibility conformance audit.
+
+### 3. Evaluate findings before deciding
+
+Select **one finding across the two reviews**, not every reported issue. Locate the referenced code, review its evidence and relevant requirement, and check whether its assumptions apply to this local game. Perform the relevant manual check if feasible, or retain the uncertainty.
+
+Use the Stage 10 classifications (**Confirmed**, **Potential concern**, **Not applicable**) and actions (**Accept**, **Modify**, **Reject**, **Investigate**). Record your rationale, whether remediation is necessary, and the exact approved scope, if any. Save both review sections and the decision in `docs/06-quality-audit.md`, including evidence, severity, requirement/WCAG references, minimal remediation, and manual/verification status. Leave unselected findings unevaluated and unresolved checks explicit. If neither review supports a finding, document the scope and limitations instead of inventing one.
+
+### 4. Optional: implement one approved correction
+
+Only if time permits and a human explicitly approves a correction, switch to Agent mode.
+
+**Paste into Copilot (Agent, optional):**
+
+> I approve only finding [ID] in `docs/06-quality-audit.md`, with this correction scope: [approved correction]. Implement one minimal correction without broad rewrites, unnecessary dependencies, or changes to unrelated behavior. Preserve the local curling game constraints and requirement traceability. Add a focused regression test where appropriate, run relevant tests and the production build, and verify the affected interaction using the review's manual steps where feasible. Report exact commands and actual results; mark any unperformed manual checks unverified. Update only this finding's remediation and verification status. Do not fix every reported issue. Stop and request approval if a wider scope is needed.
+
+**Check:** Both reviews precede any code changes; findings cite evidence and distinguish confirmed issues from potential concerns. One finding has a human decision (or no supported findings is documented). Remediation is optional, scoped, and approved; there is no unsupported claim that the game is fully secure or accessible.
 
 ## Stage 12. Documentation and onboarding
 
@@ -165,7 +238,7 @@ This is the first application setup stage. The prompt below creates the files an
 1. **Start:** Open the folder in VS Code and keep this Markdown file visible.
 2. **Plan:** Paste Stages 1–3 in Plan mode, review the generated docs, and approve.
 3. **Build:** Paste Stages 4–8 in Agent mode, pausing to run the game after each playable increment.
-4. **Validate:** Paste Stages 9–11, inspect test output, review and correct findings.
+4. **Validate:** Complete Stage 9 and inspect test output. In Stages 10–11, review first with Copilot Code Review/Ask, inspect evidence, and record human classifications and decisions. Correct one approved finding per stage only if time permits; unresolved findings and manual checks remain documented.
 5. **Ship locally:** Paste Stages 12–14, then demo the production preview and traceability matrix.
 6. **Show Git workflow (optional):** Commit after each approved increment; open a pull request if a remote repository is available, but no remote is required for this workshop.
 
